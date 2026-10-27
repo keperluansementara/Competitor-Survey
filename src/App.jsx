@@ -77,7 +77,7 @@ const parseCustomDate = (dateStr) => {
     const d = new Date(str);
     if (!isNaN(d.getTime())) return d;
   }
-  const dateMatch = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  const dateMatch = str.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
   if (dateMatch) {
     let p1 = parseInt(dateMatch[1], 10), p2 = parseInt(dateMatch[2], 10), year = parseInt(dateMatch[3], 10);
     if (year < 100) year += 2000;
@@ -455,7 +455,7 @@ export default function App() {
           const historyResponse = await fetch(GOOGLE_SHEETS_WEBAPP_URL);
           historyData = await historyResponse.json();
         }
-      } catch (err) { console.warn("Fetch history error (mungkin offline)"); }
+      } catch { console.warn("Fetch history error (mungkin offline)"); }
 
       const localOutbox = getOutbox();
 
@@ -691,7 +691,7 @@ export default function App() {
     setIsLocatingSort(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => { setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setSortByNearest(true); setIsLocatingSort(false); },
-      (err) => { alert("Gagal lokasi. Pastikan GPS aktif."); setIsLocatingSort(false); },
+      () => { alert("Gagal lokasi. Pastikan GPS aktif."); setIsLocatingSort(false); },
       { enableHighAccuracy: true, timeout: 15000 }
     );
   };
@@ -794,7 +794,7 @@ export default function App() {
           <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-cyan-500"></div>
           <div className="relative z-10 flex flex-col items-center pt-8">
             <div className="w-24 h-24 bg-white rounded-2xl shadow-md border-[4px] border-white flex items-center justify-center p-2 mb-6">
-              <img src="/SHP.png" alt="Logo" className="w-full h-full object-contain scale-[1.3] drop-shadow-sm" />
+              <img src={`${import.meta.env.BASE_URL}SHP.png`} alt="Logo" className="w-full h-full object-contain scale-[1.3] drop-shadow-sm" />
             </div>
             <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight text-center">Login Sistem Survei</h1>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8 text-center">Internal Use Only</p>
@@ -849,7 +849,7 @@ export default function App() {
             <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" title="Toggle Sidebar"><Menu size={22} /></button>
             <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center border border-amber-200 shrink-0 hidden sm:flex"><Globe size={16} className="text-amber-600" /></div>
             <div className="hidden sm:flex flex-col">
-              <h1 className="text-[14px] font-bold text-slate-700 tracking-tight leading-tight">Tools Suggest ONC by SHP</h1>
+              <h1 className="text-[14px] font-bold text-slate-700 tracking-tight leading-tight">Competitor Survey System</h1>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{authRole} Access</p>
             </div>
           </div>
@@ -875,7 +875,7 @@ export default function App() {
             <button onClick={fetchData} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Sync Data dari Cloud">
               <RefreshCw size={18} className={loading ? 'animate-spin text-blue-600' : ''} />
             </button>
-            <div className="w-8 h-8 rounded-full border border-slate-200 overflow-hidden bg-white p-0.5"><img src="/SHP.png" alt="Profile" className="w-full h-full object-contain scale-[1.3]" /></div>
+            <div className="w-8 h-8 rounded-full border border-slate-200 overflow-hidden bg-white p-0.5"><img src={`${import.meta.env.BASE_URL}SHP.png`} alt="Profile" className="w-full h-full object-contain scale-[1.3]" /></div>
           </div>
         </header>
 
@@ -1233,7 +1233,7 @@ export default function App() {
                       <div className="h-40 bg-gradient-to-r from-blue-600 to-cyan-500 relative">
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
                         <div className="absolute -bottom-12 left-8 md:left-10 w-[200px] md:w-[240px] h-[90px] md:h-[110px] bg-white rounded-3xl shadow-xl border-[4px] border-white flex items-center justify-center z-10 overflow-hidden p-1">
-                          <img src="/SHP.png" alt="SHP Logo" className="w-full h-full object-contain scale-[1.35] drop-shadow-sm" />
+                          <img src={`${import.meta.env.BASE_URL}SHP.png`} alt="SHP Logo" className="w-full h-full object-contain scale-[1.35] drop-shadow-sm" />
                         </div>
                         <div className="absolute top-4 right-4 flex gap-2">
                           <span className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-white text-[10px] font-black uppercase tracking-widest">Internal Use Only</span>
@@ -1244,7 +1244,7 @@ export default function App() {
                         <h3 className="text-3xl font-black text-slate-800 tracking-tight mb-3 uppercase">Aplikasi Survei & Validasi Toko</h3>
                         <p className="text-slate-600 text-sm font-medium leading-relaxed mb-8 max-w-3xl">Sistem informasi berbasis <strong>Geographic Information System (GIS)</strong> yang dirancang khusus untuk mempermudah proses pemetaan, pencatatan data lapangan, pengambilan dokumentasi, dan validasi lokasi toko secara real-time. Aplikasi ini terintegrasi penuh dengan <strong>Google Workspace (Google Sheets & Drive)</strong> sebagai database cloud untuk memastikan data yang dikumpulkan oleh surveyor di lapangan langsung tersedia bagi tim back-office tanpa delay.</p>
                         <div className="grid sm:grid-cols-2 gap-5 mb-10">
-                          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 items-center group hover:bg-slate-100 transition-colors"><div className="w-14 h-14 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><ShieldCheck size={28} /></div><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Project Name</p><p className="text-base font-bold text-slate-700 leading-tight">Tools Suggest ONC<br />by SHP</p></div></div>
+                          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 items-center group hover:bg-slate-100 transition-colors"><div className="w-14 h-14 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><ShieldCheck size={28} /></div><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Project Name</p><p className="text-base font-bold text-slate-700 leading-tight">Competitor Survey<br />System</p></div></div>
                           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex gap-4 items-center group hover:bg-blue-100 transition-colors"><div className="w-14 h-14 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform"><User size={28} /></div><div><p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-1">Developed & Designed By</p><p className="text-base font-black text-blue-900 uppercase">Suryo Hadi Prakoso</p></div></div>
                         </div>
                         <div className="border-t border-slate-100 pt-8">
