@@ -1,0 +1,12 @@
+node_modules
+dist
+.clasp.json
+.vercel
+
+# Rahasia & file lokal
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
