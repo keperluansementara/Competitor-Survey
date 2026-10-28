@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Crosshair, Filter, List, Navigation, Plus } from 'lucide-react';
+import { Crosshair, List, Navigation, Plus } from 'lucide-react';
 import { formatDistance, getCurrentPosition, gmapsRoute, haversine, matchCustomer, matchStatus } from '../lib';
-import { MiniMap, STATUS_META, SurveyStatsCard } from '../components/ui';
+import { KecamatanFilter, MiniMap, STATUS_META, SurveyStatsCard } from '../components/ui';
 
 const PAGE_SIZE = 40;
 
@@ -13,6 +13,7 @@ export default function ListValidasi({ customers, statusById, search, onSelect }
   const [limit, setLimit] = useState(PAGE_SIZE);
 
   const kecamatanList = useMemo(() => [...new Set(customers.map((c) => c.kecamatan))].sort(), [customers]);
+  const inKecamatan = useMemo(() => (kecamatan ? customers.filter((c) => c.kecamatan === kecamatan) : customers), [customers, kecamatan]);
 
   const toggleNearest = async () => {
     if (myPos) return setMyPos(null);
@@ -27,18 +28,14 @@ export default function ListValidasi({ customers, statusById, search, onSelect }
   };
 
   const rows = useMemo(() => {
-    let list = customers.filter((c) => {
-      if (!matchStatus(statusById[c.id], filter)) return false;
-      if (kecamatan && c.kecamatan !== kecamatan) return false;
-      return matchCustomer(c, search);
-    });
+    let list = inKecamatan.filter((c) => matchStatus(statusById[c.id], filter) && matchCustomer(c, search));
     if (myPos) {
       list = list
         .map((c) => ({ ...c, dist: c.lat != null ? haversine(myPos.lat, myPos.lng, c.lat, c.lng) : Infinity }))
         .sort((a, b) => a.dist - b.dist);
     }
     return list;
-  }, [customers, statusById, filter, kecamatan, search, myPos]);
+  }, [inKecamatan, statusById, filter, search, myPos]);
 
   // Kelompokkan per kecamatan (kecuali mode "terdekat" yang berupa satu daftar urut jarak)
   const groups = useMemo(() => {
@@ -69,19 +66,12 @@ export default function ListValidasi({ customers, statusById, search, onSelect }
               myPos ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
             <Crosshair size={14} className={locating ? 'animate-spin' : ''} /> {myPos ? 'TERDEKAT: AKTIF' : 'URUTKAN TERDEKAT'}
           </button>
-          <label className={`relative inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-wider px-3 py-2 rounded-xl border cursor-pointer ${
-            kecamatan ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
-            <Filter size={14} /> {kecamatan || 'KECAMATAN'}
-            <select value={kecamatan} onChange={(e) => { setKecamatan(e.target.value); setLimit(PAGE_SIZE); }}
-              className="absolute inset-0 opacity-0 cursor-pointer">
-              <option value="">Semua Kecamatan</option>
-              {kecamatanList.map((k) => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </label>
+          <KecamatanFilter options={kecamatanList} value={kecamatan}
+            onChange={(v) => { setKecamatan(v); setLimit(PAGE_SIZE); }} />
         </div>
       </div>
 
-      <SurveyStatsCard customers={customers} statusById={statusById} filter={filter}
+      <SurveyStatsCard customers={inKecamatan} statusById={statusById} filter={filter}
         onFilter={(v) => { setFilter(v); setLimit(PAGE_SIZE); }} className="mb-6" />
 
       {groups.map(([kec, list]) => (

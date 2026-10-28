@@ -6,7 +6,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { Crosshair, MapPin } from 'lucide-react';
 import { getCurrentPosition, gmapsRoute, matchCustomer, matchStatus } from '../lib';
-import { STATUS_META, SurveyStatsCard } from '../components/ui';
+import { KecamatanFilter, STATUS_META, SurveyStatsCard } from '../components/ui';
 
 const LAYERS = {
   peta: () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
@@ -21,9 +21,12 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '
 
 export default function MapPage({ customers, statusById, search, onSelect }) {
   const [filter, setFilter] = useState('all'); // all | belum | selesai
+  const [kecamatan, setKecamatan] = useState('');
+  const kecamatanList = useMemo(() => [...new Set(customers.map((c) => c.kecamatan))].sort(), [customers]);
+  const inKecamatan = useMemo(() => (kecamatan ? customers.filter((c) => c.kecamatan === kecamatan) : customers), [customers, kecamatan]);
   const visible = useMemo(
-    () => customers.filter((c) => matchStatus(statusById[c.id], filter) && matchCustomer(c, search)),
-    [customers, statusById, filter, search]
+    () => inKecamatan.filter((c) => matchStatus(statusById[c.id], filter) && matchCustomer(c, search)),
+    [inKecamatan, statusById, filter, search]
   );
   const elRef = useRef(null);
   const mapRef = useRef(null);
@@ -86,7 +89,7 @@ export default function MapPage({ customers, statusById, search, onSelect }) {
       cluster.addLayer(L.marker([c.lat, c.lng], { icon }).bindPopup(popup));
       pts.push([c.lat, c.lng]);
     });
-    // Fit sekali saja agar refresh status tidak me-reset posisi peta yang sedang dilihat
+    // Fit sekali saja (dan saat kecamatan diganti) agar refresh status tidak me-reset posisi peta yang sedang dilihat
     if (pts.length && !fittedRef.current) {
       mapRef.current.fitBounds(pts, { padding: [30, 30], maxZoom: 15, animate: false });
       fittedRef.current = true;
@@ -113,10 +116,14 @@ export default function MapPage({ customers, statusById, search, onSelect }) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm font-black tracking-wide text-slate-800 mb-4">
-        <MapPin size={18} className="text-slate-400" /> MAP OF LOCATION
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2 text-sm font-black tracking-wide text-slate-800">
+          <MapPin size={18} className="text-slate-400" /> MAP OF LOCATION
+        </div>
+        <KecamatanFilter options={kecamatanList} value={kecamatan}
+          onChange={(v) => { setKecamatan(v); fittedRef.current = false; }} />
       </div>
-      <SurveyStatsCard customers={customers} statusById={statusById} filter={filter} onFilter={setFilter} className="mb-4" />
+      <SurveyStatsCard customers={inKecamatan} statusById={statusById} filter={filter} onFilter={setFilter} className="mb-4" />
       <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
         <div ref={elRef} className="h-[calc(100dvh-300px)] min-h-[360px] w-full z-0" />
         {!visible.length && (

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { BarChart3, Building2, CheckCircle2, ExternalLink, Image as ImageIcon, Navigation, Target, X } from 'lucide-react';
+import { BarChart3, Building2, CheckCircle2, ExternalLink, Filter, Image as ImageIcon, Navigation, Target, X } from 'lucide-react';
 import { PRODUCTS } from '../config';
 import { driveThumb, formatDistance, formatItem, gmapsRoute, itemFilled } from '../lib';
 
@@ -94,6 +94,21 @@ export function DepoSelect({ workplaces, value, onChange }) {
         {workplaces.map((w) => <option key={w} value={w}>{w}</option>)}
       </select>
     </div>
+  );
+}
+
+// Tombol filter kecamatan (dipakai List Validasi & Map of Location)
+export function KecamatanFilter({ options, value, onChange }) {
+  return (
+    <label className={`relative inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-wider px-3 py-2 rounded-xl border cursor-pointer ${
+      value ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
+      <Filter size={14} /> {value || 'KECAMATAN'}
+      <select value={value} onChange={(e) => onChange(e.target.value)} aria-label="Filter kecamatan"
+        className="absolute inset-0 opacity-0 cursor-pointer">
+        <option value="">Semua Kecamatan</option>
+        {options.map((k) => <option key={k} value={k}>{k}</option>)}
+      </select>
+    </label>
   );
 }
 
